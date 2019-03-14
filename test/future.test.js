@@ -286,7 +286,7 @@ describe('Future', function() {
     it('returns the string representation of a Future', function() {
       assert.strictEqual(
         Future(function(reject, resolve) { void resolve; }).toString(),
-        'Future(function (reject, resolve) { void resolve; })'
+        'Future(function(reject, resolve) { void resolve; })'
       );
     });
 
