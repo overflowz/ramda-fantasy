@@ -6,23 +6,23 @@ var jsv = require('jsverify');
 
 var Maybe = require('..').Maybe;
 
-var MaybeGen = R.curry(function(a, n) {
+var MaybeGen = R.curry(function (a, n) {
   return n % 2 === 0 ? Maybe.Just(a.generator(n)) : Maybe.Nothing();
 });
 
-var MaybeShow = R.curry(function(a, m) {
+var MaybeShow = R.curry(function (a, m) {
   return (Maybe.isJust(m)) ?
     'Just(' + a.show(m.value) + ')' :
     'Nothing';
 });
 
-var MaybeShrink = R.curry(function(a, m) {
+var MaybeShrink = R.curry(function (a, m) {
   return (Maybe.isJust(m)) ?
     [Maybe.Nothing()].concat(a.shrink(m.value).map(Maybe.Just)) :
     [];
 });
 
-var MaybeArb = function(a) {
+var MaybeArb = function (a) {
   return {
     generator: jsv.generator.bless(MaybeGen(a)),
     show: MaybeShow(a),
@@ -30,20 +30,20 @@ var MaybeArb = function(a) {
   };
 };
 
-describe('Maybe', function() {
+describe('Maybe', function () {
   var m = MaybeArb(jsv.nat);
-  var env = {Maybe: MaybeArb};
+  var env = { Maybe: MaybeArb };
   var appF = 'Maybe (nat -> nat)';
   var appN = 'Maybe nat';
 
-  it('has an arbitrary', function() {
-    var arb = jsv.forall(m, function(m) {
+  it('has an arbitrary', function () {
+    var arb = jsv.forall(m, function (m) {
       return m instanceof Maybe;
     });
     jsv.assert(arb);
   });
 
-  it('is a Semigroup', function() {
+  it('is a Semigroup', function () {
     var sTest = types.semigroup;
 
     // Inner type needs to be a semigroup.
@@ -55,7 +55,7 @@ describe('Maybe', function() {
     jsv.assert(jsv.forall(s, s1, s2, sTest.associative));
   });
 
-  it('is a Functor', function() {
+  it('is a Functor', function () {
     var fTest = types.functor;
 
     jsv.assert(jsv.forall(m, fTest.iface));
@@ -63,14 +63,14 @@ describe('Maybe', function() {
     jsv.assert(jsv.forall(m, 'nat -> nat', 'nat -> nat', fTest.compose));
   });
 
-  it('is an Apply', function() {
+  it('is an Apply', function () {
     var aTest = types.apply;
 
     jsv.assert(jsv.forall(m, aTest.iface));
     jsv.assert(jsv.forall(appF, appF, appN, env, aTest.compose));
   });
 
-  it('is an Applicative', function() {
+  it('is an Applicative', function () {
     var aTest = types.applicative;
 
     jsv.assert(jsv.forall(m, aTest.iface));
@@ -79,7 +79,7 @@ describe('Maybe', function() {
     jsv.assert(jsv.forall(appN, appF, 'nat', env, aTest.interchange));
   });
 
-  it('is a Chain', function() {
+  it('is a Chain', function () {
     var cTest = types.chain;
     var f = 'nat -> Maybe nat';
 
@@ -87,24 +87,24 @@ describe('Maybe', function() {
     jsv.assert(jsv.forall(m, f, f, env, cTest.associative));
   });
 
-  describe('ChainRec', function() {
-    it('is a ChainRec', function() {
+  describe('ChainRec', function () {
+    it('is a ChainRec', function () {
       var cTest = types.chainRec;
-      var predicate = function(a) {
+      var predicate = function (a) {
         return a.length > 5;
       };
       var done = Maybe.of;
       var x = 1;
       var initial = [x];
-      var next = function(a) {
+      var next = function (a) {
         return Maybe.of(a.concat([x]));
       };
       assert.equal(true, cTest.iface(Maybe.of(1)));
       assert.equal(true, cTest.equivalence(Maybe, predicate, done, next, initial));
     });
 
-    it('is stacksafe', function() {
-      var a = Maybe.chainRec(function(next, done, n) {
+    it('is stacksafe', function () {
+      var a = Maybe.chainRec(function (next, done, n) {
         if (n === 0) {
           return Maybe.of(done('DONE'));
         } else {
@@ -114,14 +114,14 @@ describe('Maybe', function() {
       assert.equal(true, Maybe.of('DONE').equals(a));
     });
 
-    it('responds to failure immediately', function() {
-      assert.equal(true, Maybe.Nothing().equals(Maybe.chainRec(function(/*next, done, n*/) {
+    it('responds to failure immediately', function () {
+      assert.equal(true, Maybe.Nothing().equals(Maybe.chainRec(function (/*next, done, n*/) {
         return Maybe.Nothing();
       }, 100)));
     });
 
-    it('responds to failure on next step', function() {
-      return Maybe.Nothing().equals(Maybe.chainRec(function(next, done, n) {
+    it('responds to failure on next step', function () {
+      return Maybe.Nothing().equals(Maybe.chainRec(function (next, done, n) {
         if (n === 0) {
           return Maybe.Nothing();
         }
@@ -130,39 +130,39 @@ describe('Maybe', function() {
     });
   });
 
-  it('is a Monad', function() {
+  it('is a Monad', function () {
     var mTest = types.monad;
 
     jsv.assert(jsv.forall(m, mTest.iface));
   });
 
-  it('is Foldable', function() {
+  it('is Foldable', function () {
     var fTest = types.foldable;
 
     jsv.assert(jsv.forall(m, fTest.iface));
-    jsv.assert(jsv.forall('nat -> nat -> nat', 'nat', 'nat', function(f, n1, n2) {
+    jsv.assert(jsv.forall('nat -> nat -> nat', 'nat', 'nat', function (f, n1, n2) {
       return Maybe.Just(n1).reduce(R.uncurryN(2, f), n2) === f(n2)(n1);
     }));
-    jsv.assert(jsv.forall('nat -> nat -> nat', 'nat', function(f, n) {
+    jsv.assert(jsv.forall('nat -> nat -> nat', 'nat', function (f, n) {
       return Maybe.Nothing().reduce(R.uncurryN(2, f), n) === n;
     }));
   });
 });
 
-describe('Maybe usage', function() {
+describe('Maybe usage', function () {
 
-  describe('checking for Just | Nothing', function() {
-    it('should allow the user to check if the instance is a Nothing', function() {
+  describe('checking for Just | Nothing', function () {
+    it('should allow the user to check if the instance is a Nothing', function () {
       assert.equal(true, Maybe(null).isNothing);
       assert.equal(false, Maybe(42).isNothing);
     });
 
-    it('should allow the user to check if the instance is a Just', function() {
+    it('should allow the user to check if the instance is a Just', function () {
       assert.equal(true, Maybe(42).isJust);
       assert.equal(false, Maybe(null).isJust);
     });
 
-    it('can check the type statically', function() {
+    it('can check the type statically', function () {
       var nada = Maybe.Nothing();
       var just1 = Maybe.Just(1);
       assert.equal(Maybe.isJust(nada), false);
@@ -172,64 +172,96 @@ describe('Maybe usage', function() {
     });
   });
 
-  describe('#getOrElse', function() {
+  describe('#getOrElse', function () {
 
-    it('should return the contained value for if the instance is a Just', function() {
+    it('should return the contained value for if the instance is a Just', function () {
       assert.equal(42, Maybe(42).getOrElse(24));
     });
 
-    it('should return the input value if the instance is a Nothing', function() {
+    it('should return the input value if the instance is a Nothing', function () {
       assert.equal(24, Maybe(null).getOrElse(24));
     });
 
   });
 
-  describe('#@@type', function() {
+  describe('#fold/#cata', function () {
+    it('returns a Just after applying the second function arg', function () {
+      assert.equal(3, Maybe.of(1).fold(R.add(1), R.add(2)));
+      assert.equal(3, Maybe.of(1).cata(R.add(1), R.add(2)));
+    });
 
-    it('is "ramda-fantasy/Maybe"', function() {
+    it('returns a Nothing after applying the first function arg', function () {
+      assert.equal(2, Maybe.Nothing().fold(_ => 2, R.add(2)));
+      assert.equal(2, Maybe.Nothing().cata(_ => 2, R.add(2)));
+    });
+  });
+
+  describe('#catchMap', function () {
+    it('converts Nothing to Just and returns the value', function () {
+      assert.ok(Maybe.Just(2).equals(Maybe.Nothing().catchMap(_ => 2)));
+    });
+
+    it('returns a value of the Just without mapping the passed function', function () {
+      assert.ok(Maybe.Just(1).equals(Maybe.Just(1).catchMap(R.add(1))));
+    });
+  });
+
+  describe('orLazy', function () {
+    it('returns the value from the mapped function', function () {
+      assert.equal(1, Maybe.Nothing().orLazy(_ => 1));
+    });
+
+    it('returns the value without mapping the function', function () {
+      assert.equal(1, Maybe.Just(1).orElse(_ => 2));
+    });
+  });
+
+  describe('#@@type', function () {
+
+    it('is "ramda-fantasy/Maybe"', function () {
       assert.strictEqual(Maybe.Just(null)['@@type'], 'ramda-fantasy/Maybe');
       assert.strictEqual(Maybe.Nothing()['@@type'], 'ramda-fantasy/Maybe');
     });
 
   });
 
-  describe('#toString', function() {
+  describe('#toString', function () {
 
-    it('returns the string representation of a Just', function() {
+    it('returns the string representation of a Just', function () {
       assert.strictEqual(Maybe.Just([1, 2, 3]).toString(),
-                         'Maybe.Just([1, 2, 3])');
+        'Maybe.Just([1, 2, 3])');
     });
 
-    it('returns the string representation of a Nothing', function() {
+    it('returns the string representation of a Nothing', function () {
       assert.strictEqual(Maybe.Nothing().toString(),
-                         'Maybe.Nothing()');
+        'Maybe.Nothing()');
     });
 
   });
 
-  describe('#maybe', function() {
+  describe('#maybe', function () {
 
-    it('returns the result of applying the value of a Just to the second argument', function() {
-      jsv.assert(jsv.forall('nat -> nat', 'nat', 'nat', function(f, n1, n2) {
+    it('returns the result of applying the value of a Just to the second argument', function () {
+      jsv.assert(jsv.forall('nat -> nat', 'nat', 'nat', function (f, n1, n2) {
         return R.equals(Maybe.maybe(n2, f, Maybe.Just(n1)), f(n1));
       }));
     });
 
-    it('returns the first argument for a Nothing', function() {
-      jsv.assert(jsv.forall('nat -> nat', 'nat', 'nat', function(f, n) {
+    it('returns the first argument for a Nothing', function () {
+      jsv.assert(jsv.forall('nat -> nat', 'nat', 'nat', function (f, n) {
         return R.equals(Maybe.maybe(n, f, Maybe.Nothing()), n);
       }));
     });
   });
 
-  describe('#toMaybe', function() {
-    it('produces a Nothing for null/undefined', function() {
+  describe('#toMaybe', function () {
+    it('produces a Nothing for null/undefined', function () {
       assert(Maybe.toMaybe(null).isNothing);
       assert(Maybe.toMaybe(void 0).isNothing);
     });
 
-    it('produces a Just for non-null values', function() {
-      jsv.assert(jsv.forall(jsv.integer, function(n) {
+    it('produces a Just for non-null values', function () {
+      jsv.assert(jsv.forall(jsv.integer, function (n) {
         return Maybe.toMaybe(n).isJust;
       }));
     });
