@@ -204,6 +204,10 @@ describe('Maybe usage', function () {
     it('returns a value of the Just without mapping the passed function', function () {
       assert.ok(Maybe.Just(1).equals(Maybe.Just(1).catchMap(R.add(1))));
     });
+
+    it('returns Nothing after mapped function returns null/undefined', function() {
+      assert.ok(Maybe.Nothing().equals(Maybe.Nothing().catchMap(_ => null)));
+    });
   });
 
   describe('orLazy', function () {
