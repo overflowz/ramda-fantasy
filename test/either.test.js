@@ -221,6 +221,24 @@ describe('Either', function () {
     });
   });
 
+  describe('#catchMap', function () {
+    it('converts Left to Right and returns the value', function () {
+      assert.ok(Either.Right(2).equals(Either.Left().catchMap(_ => 2)));
+    });
+
+    it('returns a value of the Right without mapping the passed function', function () {
+      assert.ok(Either.Right(1).equals(Either.Right(1).catchMap(R.add(1))));
+    });
+
+    it('returns Left(null) after mapped function returns null', function () {
+      assert.ok(Either.Left(null).equals(Either.Left().catchMap(_ => null)));
+    });
+
+    it('returns Left after mapped function returns undefined', function () {
+      assert.ok(Either.Left().equals(Either.Left().catchMap(_ => undefined)));
+    });
+  });
+
 
 
   describe('#either', function () {
