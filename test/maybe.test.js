@@ -197,7 +197,7 @@ describe('Maybe usage', function () {
   });
 
   describe('#catchMap', function () {
-    it('converts Nothing to Just and returns the value', function () {
+    it('converts Nothing to Just and returns the result value of the passed function', function () {
       assert.ok(Maybe.Just(2).equals(Maybe.Nothing().catchMap(_ => 2)));
     });
 

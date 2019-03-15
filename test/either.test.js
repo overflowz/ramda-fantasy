@@ -222,7 +222,7 @@ describe('Either', function () {
   });
 
   describe('#catchMap', function () {
-    it('converts Left to Right and returns the value', function () {
+    it('converts Left to Right and returns the result of the mapped function', function () {
       assert.ok(Either.Right(2).equals(Either.Left().catchMap(_ => 2)));
     });
 
