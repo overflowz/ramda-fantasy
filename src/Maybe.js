@@ -70,7 +70,7 @@ Just.prototype.map = function (f) {
 Nothing.prototype.map = util.returnThis;
 
 Nothing.prototype.catchMap = function (f) {
-  return Maybe.Just(f());
+  return Maybe.toMaybe(f());
 };
 
 Just.prototype.catchMap = util.returnThis;
