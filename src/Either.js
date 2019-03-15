@@ -9,7 +9,7 @@ function Either(left, right) {
     case 0:
       throw new TypeError('no arguments to Either');
     case 1:
-      return function(right) {
+      return function (right) {
         return right == null ? Either.Left(left) : Either.Right(right);
       };
     default:
@@ -20,8 +20,9 @@ function Either(left, right) {
 Either.prototype['@@type'] = 'ramda-fantasy/Either';
 
 Either.prototype.map = util.returnThis;
+Either.prototype.leftMap = util.returnThis;
 
-Either.of = Either.prototype.of = function(value) {
+Either.of = Either.prototype.of = function (value) {
   return Either.Right(value);
 };
 
@@ -37,11 +38,11 @@ Either.either = curry(function either(leftFn, rightFn, e) {
   }
 });
 
-Either.isLeft = function(x) {
+Either.isLeft = function (x) {
   return x.isLeft;
 };
 
-Either.isRight = function(x) {
+Either.isRight = function (x) {
   return x.isRight;
 };
 
@@ -55,20 +56,24 @@ util.extend(_Right, Either);
 _Right.prototype.isRight = true;
 _Right.prototype.isLeft = false;
 
-_Right.prototype.map = function(fn) {
+_Right.prototype.map = function (fn) {
   return new _Right(fn(this.value));
 };
 
-_Right.prototype.ap = function(that) {
+_Right.prototype.cata = _Right.prototype.fold = function (f, g) {
+  return g(this.value);
+};
+
+_Right.prototype.ap = function (that) {
   return that.map(this.value);
 };
 
-_Right.prototype.chain = function(f) {
+_Right.prototype.chain = function (f) {
   return f(this.value);
 };
 
 //chainRec
-Either.chainRec = Either.prototype.chainRec = function(f, i) {
+Either.chainRec = Either.prototype.chainRec = function (f, i) {
   var res, state = util.chainRecNext(i);
   while (state.isNext) {
     res = f(util.chainRecNext, util.chainRecDone, state.value);
@@ -80,21 +85,21 @@ Either.chainRec = Either.prototype.chainRec = function(f, i) {
   return Either.Right(state.value);
 };
 
-_Right.prototype.bimap = function(_, f) {
+_Right.prototype.bimap = function (_, f) {
   return new _Right(f(this.value));
 };
 
-_Right.prototype.extend = function(f) {
+_Right.prototype.extend = function (f) {
   return new _Right(f(this));
 };
 
-_Right.prototype.toString = function() {
+_Right.prototype.toString = function () {
   return 'Either.Right(' + toString(this.value) + ')';
 };
 
 _Right.prototype.equals = util.getEquals(_Right);
 
-Either.Right = function(value) {
+Either.Right = function (value) {
   return new _Right(value);
 };
 
@@ -108,21 +113,29 @@ util.extend(_Left, Either);
 _Left.prototype.isLeft = true;
 _Left.prototype.isRight = false;
 
+_Left.prototype.leftMap = function (f) {
+  return Either.Left(f(this.value));
+}
+
+_Left.prototype.cata = _Left.prototype.fold = function (f, g) {
+  return f(this.value);
+};
+
 _Left.prototype.ap = util.returnThis;
 
-_Left.prototype.bimap = function(f) {
+_Left.prototype.bimap = function (f) {
   return new _Left(f(this.value));
 };
 
 _Left.prototype.extend = util.returnThis;
 
-_Left.prototype.toString = function() {
+_Left.prototype.toString = function () {
   return 'Either.Left(' + toString(this.value) + ')';
 };
 
 _Left.prototype.equals = util.getEquals(_Left);
 
-Either.Left = function(value) {
+Either.Left = function (value) {
   return new _Left(value);
 };
 
