@@ -21,6 +21,7 @@ Either.prototype['@@type'] = 'ramda-fantasy/Either';
 
 Either.prototype.map = util.returnThis;
 Either.prototype.leftMap = util.returnThis;
+Either.prototype.catchMap = util.returnThis;
 
 Either.of = Either.prototype.of = function (value) {
   return Either.Right(value);
@@ -44,6 +45,10 @@ Either.isLeft = function (x) {
 
 Either.isRight = function (x) {
   return x.isRight;
+};
+
+Either.toEither = function (x) {
+  return x == null ? Either.Left(x) : Either.Right(x);
 };
 
 
@@ -116,6 +121,10 @@ _Left.prototype.isRight = false;
 _Left.prototype.leftMap = function (f) {
   return Either.Left(f(this.value));
 }
+
+_Left.prototype.catchMap = function (f) {
+  return Either.toEither(f(this.value));
+};
 
 _Left.prototype.cata = _Left.prototype.fold = function (f, g) {
   return f(this.value);
