@@ -75,11 +75,11 @@ Nothing.prototype.catchMap = function (f) {
 
 Just.prototype.catchMap = util.returnThis;
 
-Just.prototype.cata = function (f, g) {
+Just.prototype.cata = Just.prototype.fold = function (f, g) {
   return g(this.value);
 };
 
-Nothing.prototype.cata = function (f, g) {
+Nothing.prototype.cata = Nothing.prototype.fold = function (f, g) {
   return f();
 };
 
