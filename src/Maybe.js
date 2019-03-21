@@ -76,7 +76,7 @@ Nothing.prototype.catchMap = function (f) {
 Just.prototype.catchMap = util.returnThis;
 
 Just.prototype.cata = Just.prototype.fold = function (f, g) {
-  return g(this.value);
+  return typeof g === 'function' ? g(this.value) : f(this.value);
 };
 
 Nothing.prototype.cata = Nothing.prototype.fold = function (f, g) {
