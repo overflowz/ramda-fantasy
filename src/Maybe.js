@@ -151,9 +151,7 @@ Nothing.prototype.orElse = Nothing.prototype.getOrElse = function (a) {
   return a;
 };
 
-Just.prototype.orLazy = function (f) {
-  return f(this.value);
-};
+Just.prototype.orLazy = util.returnThis;
 
 Nothing.prototype.orLazy = function (f) {
   return f();
