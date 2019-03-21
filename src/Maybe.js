@@ -33,6 +33,10 @@ Maybe.Just = function (x) {
   return new Just(x);
 };
 
+Maybe.fromFalsy = b => {
+  return b ? Maybe.Just(b) : Maybe.Nothing();
+};
+
 Maybe.of = Maybe.Just;
 
 Maybe.prototype.of = Maybe.Just;
