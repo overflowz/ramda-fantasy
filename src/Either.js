@@ -66,7 +66,7 @@ _Right.prototype.map = function (fn) {
 };
 
 _Right.prototype.cata = _Right.prototype.fold = function (f, g) {
-  return g(this.value);
+  return typeof g === 'function' ? g(this.value) : f(this.value);
 };
 
 _Right.prototype.ap = function (that) {
