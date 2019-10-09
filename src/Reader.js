@@ -16,7 +16,7 @@ Reader.run = function(reader) {
 };
 
 Reader.runSwap = function () {
-  var args = [].slice.call(arguments, 1);
+  var args = [].slice.call(arguments);
   return function (reader) {
     return reader.run.apply(reader, args);
   };
