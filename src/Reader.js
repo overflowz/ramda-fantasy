@@ -15,6 +15,13 @@ Reader.run = function(reader) {
   return reader.run.apply(reader, [].slice.call(arguments, 1));
 };
 
+Reader.runSwap = function () {
+  var args = [].slice.call(arguments, 1);
+  return function (reader) {
+    return reader.run.apply(reader, args);
+  };
+};
+
 Reader.prototype['@@type'] = 'ramda-fantasy/Reader';
 
 Reader.prototype.chain = function(f) {
